@@ -1084,6 +1084,38 @@ def ingest():
             user_map = ingest_users(db, df_users, bank_map, branch_map)
         else:
             print("Warning: No user data found")
+            
+        # --- Create simplified, friendly usernames for every bank automatically ---
+        bank_role = db.query(Role).filter(Role.name == "Bank HQ Integration User").first()
+        for code, bank in bank_map.items():
+            simple_name = code.lower()
+            bname = (bank.name or "").lower()
+            
+            if 'hdfc' in simple_name or 'hdfc' in bname: simple_name = 'hdfc'
+            elif 'sbi' in simple_name or 'state bank' in bname: simple_name = 'sbi'
+            elif 'uco' in simple_name or 'uco' in bname: simple_name = 'uco'
+            elif 'axis' in simple_name or 'utib' in simple_name: simple_name = 'axis'
+            elif 'icic' in simple_name or 'icici' in bname: simple_name = 'icici'
+            elif 'yes' in simple_name or 'yes bank' in bname: simple_name = 'yes'
+            elif 'kotak' in simple_name or 'kkbk' in simple_name: simple_name = 'kotak'
+            elif 'pnb' in simple_name or 'punb' in simple_name or 'punjab' in bname: simple_name = 'pnb'
+            elif 'bob' in simple_name or 'barb' in simple_name or 'baroda' in bname: simple_name = 'bob'
+            
+            existing = db.query(User).filter(User.username == simple_name).first()
+            if not existing:
+                default_branch = db.query(Branch).filter(Branch.bank_id == bank.id).first()
+                u = User(
+                    username=simple_name,
+                    email=f"{simple_name}@lumien.local",
+                    hashed_password=get_password_hash("password123"),
+                    is_active=True,
+                    bank_id=bank.id,
+                    branch_id=default_branch.id if default_branch else None,
+                    roles=[bank_role] if bank_role else []
+                )
+                db.add(u)
+        db.commit()
+        # ------------------------------------------------------------------------
 
         if not df_reports.empty:
             complaint_map = ingest_complaints(db, df_reports, df_incidents, bank_map, branch_map)
