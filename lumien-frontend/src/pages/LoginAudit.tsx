@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { adminApi } from '../api';
+import api, { adminApi } from '../api';
 
 interface LoginRecord {
   audit_id: string;
