@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+fiducia.db
+fiducia_v2.db
+.env
