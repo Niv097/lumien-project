@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
         return (
             <div className="space-y-6 max-w-7xl mx-auto">
                 {/* Bank Header */}
-                <header className="flex justify-between items-center">
+                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 bg-gradient-to-br ${bankBrand.color} rounded-xl flex items-center justify-center shadow-lg`}>
@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
                         <div className="text-right">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SLA Response Window</p>
                             <p className="text-sm font-bold text-slate-900">23h 45m remaining</p>

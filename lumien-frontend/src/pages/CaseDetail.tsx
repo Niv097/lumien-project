@@ -178,9 +178,9 @@ const CaseDetail: React.FC = () => {
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-20">
-            <header className="flex justify-between items-center">
-                <div className="flex items-center gap-6">
-                    <button onClick={() => navigate(-1)} className="p-2 border border-slate-200 rounded-xl hover:bg-white hover:shadow-sm transition-all group">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-start md:items-center gap-4 md:gap-6">
+                    <button onClick={() => navigate(-1)} className="p-2 border border-slate-200 rounded-xl hover:bg-white hover:shadow-sm transition-all group flex-shrink-0">
                         <ArrowLeft className="w-5 h-5 text-slate-500 group-hover:text-slate-900 group-hover:-translate-x-1 transition-all" />
                     </button>
                     <div>
@@ -251,7 +251,7 @@ const CaseDetail: React.FC = () => {
                                 <FileText className="w-4 h-4" /> Complaint Data
                             </h3>
                         </div>
-                        <div className="p-8 grid grid-cols-3 gap-y-8">
+                        <div className="p-4 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 md:gap-y-8 gap-x-4">
                             <div>
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Transaction ID</p>
                                 <p className="text-sm font-bold text-slate-900">{data.transaction_id || 'N/A'}</p>
@@ -346,17 +346,17 @@ const CaseDetail: React.FC = () => {
                                                     </div>
                                                     
                                                     {/* Transaction details */}
-                                                    <div className="flex-1 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                                        <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex-1 bg-slate-50 rounded-xl p-4 border border-slate-100 overflow-hidden">
+                                                        <div className="flex flex-wrap items-center justify-between mb-3 gap-2">
                                                             <span className="text-xs font-black text-slate-500 uppercase tracking-widest">
                                                                 Step {hop.step}
                                                             </span>
-                                                            <span className="text-[10px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium">
+                                                            <span className="text-[10px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded font-medium truncate max-w-full">
                                                                 {hop.direction}
                                                             </span>
                                                         </div>
                                                         
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div>
                                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">From Account</p>
                                                                 <p className="text-sm font-bold text-slate-900 font-mono">{hop.from_account}</p>
@@ -432,13 +432,13 @@ const CaseDetail: React.FC = () => {
                                                 <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center">
                                                     <ArrowRightLeft className="w-5 h-5 text-sky-600" />
                                                 </div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-slate-900">RRN: {incident.rrn || 'N/A'}</p>
-                                                    <p className="text-xs text-slate-500">{incident.transaction_date || 'N/A'} {incident.transaction_time || ''}</p>
-                                                    <p className="text-xs text-slate-400">To: {incident.payee_bank || 'N/A'}</p>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-bold text-slate-900 truncate">RRN: {incident.rrn || 'N/A'}</p>
+                                                    <p className="text-xs text-slate-500 truncate">{incident.transaction_date || 'N/A'} {incident.transaction_time || ''}</p>
+                                                    <p className="text-xs text-slate-400 truncate">To: {incident.payee_bank || 'N/A'}</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-right flex-shrink-0">
                                                 <p className="text-lg font-black text-slate-900 font-mono">₹{(incident.amount || 0).toLocaleString()}</p>
                                                 {incident.disputed_amount > 0 && (
                                                     <p className="text-xs text-rose-600 font-medium">Disputed: ₹{incident.disputed_amount.toLocaleString()}</p>
@@ -512,8 +512,8 @@ const CaseDetail: React.FC = () => {
                                     <RefreshCw className="w-4 h-4" /> Response Cycle
                                 </h3>
                             </div>
-                            <div className="p-8">
-                                <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 md:p-8">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div>
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Request ID</p>
                                         <p className="text-sm font-mono text-slate-900">{data.response_cycle.request_id || 'N/A'}</p>
@@ -613,7 +613,7 @@ const CaseDetail: React.FC = () => {
                                 </label>
                             </div>
                         </div>
-                        <div className="p-8">
+                        <div className="p-4 md:p-8">
                             {data?.evidence?.length > 0 ? (
                                 <div className="space-y-3">
                                     {data.evidence.map((item: any, idx: number) => (
@@ -653,8 +653,8 @@ const CaseDetail: React.FC = () => {
                 </div>
 
                 <div className="lg:col-span-4 space-y-8">
-                    <div className="card bg-slate-900 border-slate-800 shadow-2xl sticky top-8">
-                        <div className="p-8">
+                    <div className="card bg-slate-900 border-slate-800 shadow-2xl lg:sticky lg:top-24">
+                        <div className="p-4 md:p-8">
                             <h3 className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                                 <ShieldAlert className="w-4 h-4" /> Bank Action Playbook
                             </h3>

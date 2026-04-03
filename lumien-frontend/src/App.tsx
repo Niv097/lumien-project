@@ -20,10 +20,12 @@ import MoneyRestoration from './pages/MoneyRestoration';
 import RestorationDetail from './pages/RestorationDetail';
 import DemoDataset from './pages/DemoDataset';
 
+import { Menu } from 'lucide-react';
 import Login from './pages/Login';
 
 const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = React.useState(!!localStorage.getItem('lumien_token'));
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     if (!isAuthenticated) {
         return <Login onLogin={() => setIsAuthenticated(true)} />;
@@ -32,9 +34,17 @@ const App: React.FC = () => {
     return (
         <Router>
             <div className="flex min-h-screen bg-slate-50">
-                <Sidebar />
-                <main className="flex-1 ml-64 p-8">
-                    <Routes>
+                <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+                <main className="flex-1 lg:ml-64 w-full md:max-w-full overflow-x-hidden">
+                    {/* Mobile Header */}
+                    <div className="lg:hidden p-4 bg-white border-b flex items-center gap-4 sticky top-0 z-30">
+                        <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100">
+                            <Menu className="w-5 h-5" />
+                        </button>
+                        <h1 className="font-bold text-slate-900">Lumien Portal</h1>
+                    </div>
+                    <div className="p-4 md:p-8">
+                        <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/inbox" element={<CaseInbox />} />
                         <Route path="/case/:id" element={<CaseDetail />} />
@@ -55,6 +65,7 @@ const App: React.FC = () => {
                         <Route path="/settings" element={<Settings />} />
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
+                    </div>
                 </main>
             </div>
         </Router>

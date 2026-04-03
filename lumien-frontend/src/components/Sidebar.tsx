@@ -17,6 +17,7 @@ import {
     Database,
     Activity,
     LogOut,
+    X,
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -61,7 +62,7 @@ const BankLogo: React.FC<{ type: string; color: string }> = ({ type, color }) =>
     }
 };
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ isOpen?: boolean; setIsOpen?: (isOpen: boolean) => void }> = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
     const { brand } = useBrand();
     const roles = JSON.parse(localStorage.getItem('lumien_roles') || '[]');
@@ -114,18 +115,36 @@ const Sidebar: React.FC = () => {
     };
 
     return (
-        <div className="w-64 bg-white border-r border-slate-200 h-screen fixed left-0 top-0 flex flex-col z-50">
-            <div className="p-8">
-                <div className="flex items-center gap-3">
-                    <BankLogo type={brand.logoType} color={brand.primaryColor} />
-                    <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                        {brand.logoType === 'LUMIEN' ? 'LUMIEN' : brand.name.replace(' Bank', '').toUpperCase()}
-                    </h1>
+        <>
+            {/* Mobile Overlay */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden transition-opacity"
+                    onClick={() => setIsOpen?.(false)}
+                />
+            )}
+            
+            <div className={cn(
+                "w-64 bg-white border-r border-slate-200 h-screen fixed left-0 top-0 flex flex-col z-50 transition-transform duration-300",
+                isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            )}>
+                <div className="p-4 lg:p-8 flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <BankLogo type={brand.logoType} color={brand.primaryColor} />
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+                                {brand.logoType === 'LUMIEN' ? 'LUMIEN' : brand.name.replace(' Bank', '').toUpperCase()}
+                            </h1>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">
+                            {brand.logoType === 'LUMIEN' ? 'Intermediary Hub' : 'Dedicated Portal node'}
+                        </p>
+                    </div>
+                    {/* Mobile close button */}
+                    <button onClick={() => setIsOpen?.(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-lg">
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">
-                    {brand.logoType === 'LUMIEN' ? 'Intermediary Hub' : 'Dedicated Portal node'}
-                </p>
-            </div>
 
             <nav className="flex-1 px-4 py-2 space-y-8 overflow-y-auto">
                 {navItems.map((group) => {
@@ -178,7 +197,8 @@ const Sidebar: React.FC = () => {
                     </button>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 };
 
