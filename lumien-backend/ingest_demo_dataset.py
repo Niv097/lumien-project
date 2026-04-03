@@ -31,7 +31,7 @@ from app.models.models import (
     DemoBankCaseWorkflow, DemoBankHoldAction,
     DemoBankStatusUpdateRequest, DemoBankStatusUpdateTxnDetail,
     DemoI4CStatusUpdateResponse, DemoWorkflowTimeline,
-    MetaStatusCode, DemoScenario
+    MetaStatusCode, DemoScenario, Case, SourceType, UnifiedCaseStatus
 )
 from app.core.config import settings
 from app.core.security import get_password_hash
@@ -491,6 +491,21 @@ def ingest_users(db, df_users, bank_map, branch_map):
         user_map[username] = user
         print(f"  Created user: {username} (Bank ID: {bank_id}, Branch ID: {branch_id}) - ID: {user.id}")
     
+    # Ensure platform admin exists so company head isn't kicked out
+    admin_user = db.query(User).filter(User.username == "admin").first()
+    if not admin_user:
+        admin_user = User(
+            username="admin",
+            email="admin@lumien.local",
+            hashed_password=get_password_hash("password123"),
+            is_active=True,
+            bank_id=None,
+            branch_id=None,
+            role="admin",
+            roles=[admin_role]
+        )
+        db.add(admin_user)
+
     db.commit()
     return user_map
 
@@ -559,6 +574,26 @@ def ingest_complaints(db, df_reports, df_incidents, bank_map, branch_map):
         db.add(complaint)
         db.flush()
         complaint_map[ack_no] = complaint
+        
+        # Also create the parallel Unified Case object
+        case_obj = Case(
+            case_id=f"C-{ack_no}",
+            transaction_id=str(incident_row['rrn']) if incident_row is not None and pd.notna(incident_row.get('rrn')) else f"TXN-{ack_no}",
+            amount=amount,
+            payment_mode=str(row.get('mode_of_payment', 'UNKNOWN')).strip(),
+            payer_account_number=str(row.get('payer_account_number', '')).strip(),
+            payer_bank=str(row.get('payer_bank', '')).strip(),
+            mobile_number=str(row.get('payer_mobile_number', '')).strip(),
+            district=str(row.get('district', '')).strip(),
+            state=str(row.get('state', '')).strip(),
+            source_type=SourceType.DEMO,
+            branch_id=branch_id,
+            status=UnifiedCaseStatus.NEW,
+            created_at=incident_date,
+            acknowledgement_no=ack_no,
+            i4c_sync_status="PENDING"
+        )
+        db.add(case_obj)
         
         # Create enrichment result
         if bank_id:
