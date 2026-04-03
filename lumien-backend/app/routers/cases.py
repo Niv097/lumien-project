@@ -51,24 +51,19 @@ def _get_case_with_branch_scope(db: Session, case_id: str, user: models.User) ->
         # Admin can access any case - but still scope the query
         return db.query(models.Case).filter(models.Case.case_id == case_id).first()
     else:
-        # Branch user - MUST filter by branch_id for security
-        if not user.branch_id:
-            raise HTTPException(status_code=403, detail="User not assigned to any branch")
+        # Bank-level security restrictions
+        branch = None
+        if user.branch_id:
+            branch = db.query(models.Branch).filter(models.Branch.id == user.branch_id).first()
         
-        branch = db.query(models.Branch).filter(models.Branch.id == user.branch_id).first()
-        if not branch:
-            raise HTTPException(status_code=403, detail="User's branch not found")
-        
-        # STRICT SECURITY:
-        # - Case must match case_id
-        # - Branch users can access cases assigned to their branch
-        # - Always show demo dataset cases to branch users for the demo environment
+        # Build filter logic: allow case matching if assigned to branch OR if the case is a demo case
+        security_filters = [models.Case.source_type == SourceType.DEMO]
+        if branch:
+            security_filters.append(models.Case.branch_id == user.branch_id)
+            
         case = db.query(models.Case).filter(
             models.Case.case_id == case_id,
-            or_(
-                models.Case.branch_id == user.branch_id,
-                models.Case.source_type == SourceType.DEMO,
-            ),
+            or_(*security_filters)
         ).first()
         
         return case
@@ -99,24 +94,19 @@ def get_cases(
         # Admin sees all cases
         query = db.query(models.Case)
     else:
-        # Branch user - apply visibility rules
+        # Bank user visibility rules
         branch = None
         if user.branch_id:
             branch = db.query(models.Branch).filter(models.Branch.id == user.branch_id).first()
         
-        if not branch:
-            raise HTTPException(status_code=403, detail="User not assigned to any branch")
-        
-        # Build query for branch user
-        # Show:
-        # 1. Cases assigned to this branch
-        # 2. ALL demo cases for the demo environment
+        # Build query
         filters = []
         
-        # 1. Cases assigned to this branch
-        filters.append(models.Case.branch_id == user.branch_id)
+        # 1. If assigned to a specific branch, show their exclusive cases
+        if branch:
+            filters.append(models.Case.branch_id == user.branch_id)
         
-        # 2. All demo cases are visible to ALL authenticated branch users
+        # 2. ALL authenticated bank users (HQ and Branch level) can see all DEMO cases unanimously.
         filters.append(models.Case.source_type == SourceType.DEMO)
         
         query = db.query(models.Case).filter(or_(*filters))
