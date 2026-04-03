@@ -15,7 +15,7 @@ services:
 
   backend:
     build: 
-      context: ./fiducia-backend
+      context: ./lumien-backend   # ✅ FIXED
     ports:
       - "8000:8000"
     environment:
@@ -35,7 +35,7 @@ services:
 
   frontend:
     build: 
-      context: ./fiducia-frontend
+      context: ./lumien-frontend   # ✅ FIXED
     ports:
       - "80:80"
     depends_on:
